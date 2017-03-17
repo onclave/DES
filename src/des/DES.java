@@ -1,7 +1,5 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * This code file is free to be used and modified as required
  */
 package des;
 
@@ -12,8 +10,7 @@ import java.io.IOException;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
- *
- * @author STAR-DUST
+ * @author Debabrata Acharya
  */
 public class DES {
     
@@ -22,10 +19,22 @@ public class DES {
     private static final String BINARY_8_BIT_FORMAT = "%08d";
     private static final int SEQUENCE_LENGTH = 8;
     private static int FILE_CONTENT_LENGTH;
+    
+    private static final int[][] PERMUTATION_COMBINATION_ONE = new int[][]{
+        {57, 49, 41, 33, 25, 17, 9},
+        {1, 58, 50, 42, 34, 26, 18},
+        {10, 2, 59, 51, 43, 35, 27},
+        {19, 11, 3, 60, 52, 44, 36},
+        {63, 55, 47, 39, 31, 23, 15},
+        {7, 62, 54, 46, 38, 30, 22},
+        {14, 6, 61, 53, 45, 37, 29},
+        {21, 13, 5, 28, 20, 12, 4},
+    };
 
     public static void main(String[] args) throws IOException {
-        String key = generate56BitKey(generateSequence(readFile(DES.FILE_NAME), generateBitPosition()));
-        System.out.println(key);
+        
+        String KEY56bit = generate56BitKey(generateSequence(readFile(DES.FILE_NAME), generateBitPosition()));
+        System.out.println(KEY56bit);
     }
     
     private static String readFile(final String fileName) throws FileNotFoundException, IOException {
@@ -42,6 +51,14 @@ public class DES {
         setFileContentLength(fileContent.length());
         
         return fileContent;
+    }
+    
+    private static int getFileContentLength() {
+        return DES.FILE_CONTENT_LENGTH;
+    }
+    
+    private static void setFileContentLength(final int value) {
+        DES.FILE_CONTENT_LENGTH = value;
     }
     
     private static int generateBitPosition() {
@@ -62,20 +79,25 @@ public class DES {
     
     private static String generate56BitKey(final String string) {
         
-        String binaryString = DES.EMPTY_STRING;
+        String KEY64bit = DES.EMPTY_STRING;
+        String KEYplus56bit = DES.EMPTY_STRING;
+        char[] KEYplus56bitArray = new char[56];
+        int position = 0;
         
         for(int i = 0; i < string.length(); i++) {
-            binaryString += spliceLastCharacter(convertTo8bitString(string.charAt(i)));
+            KEY64bit += convertTo8bitString(string.charAt(i));
         }
         
-        return binaryString;
-    }
-    
-    private static int getFileContentLength() {
-        return DES.FILE_CONTENT_LENGTH;
-    }
-    
-    private static void setFileContentLength(final int value) {
-        DES.FILE_CONTENT_LENGTH = value;
+        for(int i = 0; i < 8; i++) {
+            for(int j = 0; j < 7; j++) {
+                KEYplus56bitArray[position++] = KEY64bit.charAt(DES.PERMUTATION_COMBINATION_ONE[i][j]);
+            }
+        }
+        
+        for(char value : KEYplus56bitArray) {
+            KEYplus56bit += value;
+        }
+        
+        return KEYplus56bit;
     }
 }
